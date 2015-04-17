@@ -84,6 +84,16 @@ void ISGDScheduler::ShowProgress(
          acc.Mean(),
          (double)nnz_w,
          sqrt(delta_sum) / sqrt(weight_sum));
+
+  if (report_count_ % 10 == 0) {
+    // save model
+    NOTICE("save model");
+    Task task;
+    task.mutable_sgd()->set_cmd(SGDCall::SAVE_MODEL);
+    int ts = Submit(task, kServerGroup);
+    Wait(ts);
+  }
+  report_count_++;
 }
 
 

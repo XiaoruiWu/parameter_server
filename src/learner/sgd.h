@@ -41,6 +41,7 @@ class ISGDScheduler : public App {
   // display
   size_t num_ex_processed_ = 0;
   bool show_prog_head_ = true;
+  int report_count_ = 0;
 };
 
 /**

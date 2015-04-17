@@ -69,9 +69,10 @@ class AsyncSGDServer : public ISGDCompNode {
     auto output = conf_.model_output();
     if (output.format() == DataConfig::TEXT) {
       CHECK(output.file_size());
-      std::string file = output.file(0) + "_" + MyNodeID();
+      std::string file = output.file(0) + "_" + std::to_string(count_) + "_" + MyNodeID();
       CHECK_NOTNULL(model_)->WriteToFile(file);
       LOG(INFO) << MyNodeID() << " written the model to " << file;
+      count_++;
     }
   }
 
@@ -83,6 +84,7 @@ class AsyncSGDServer : public ISGDCompNode {
  protected:
   Parameter* model_ = nullptr;
   Config conf_;
+  int count_ = 0;
 
   /**
    * @brief Progress state
