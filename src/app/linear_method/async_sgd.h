@@ -232,6 +232,7 @@ class AsyncSGDWorker : public ISGDCompNode {
   void UpdateModel(const Workload& load) {
     LOG(INFO) << MyNodeID() << ": accept workload " << load.id();
     VLOG(1) << "workload data: " << load.data().ShortDebugString();
+    std::cout << MyNodeID() << " work on data: " << load.data().ShortDebugString() << std::endl;
     const auto& sgd = conf_.async_sgd();
     MinibatchReader<V> reader;
     reader.InitReader(load.data(), sgd.minibatch(), sgd.data_buf());
