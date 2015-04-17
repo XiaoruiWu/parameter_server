@@ -72,12 +72,13 @@ void ISGDScheduler::ShowProgress(
   progress->clear();
   num_ex_processed_ += num_ex;
   if (show_prog_head_) {
-    NOTICE(" sec  examples    loss      auc   accuracy   |w|_0  updt ratio");
+    NOTICE(" sec  examples   num_ex   loss      auc   accuracy   |w|_0  updt ratio");
     show_prog_head_ = false;
   }
-  NOTICE("%4d  %.2e  %.3e  %.4f  %.4f  %.2e  %.2e",
+  NOTICE("%4d, %.2e, %.2e, %.3e, %.4f, %.4f, %.2e, %.2e",
          (int)time,
          (double)num_ex_processed_ ,
+         (double)num_ex,
          objv.Sum()/(double)num_ex,
          auc.Mean(),
          acc.Mean(),

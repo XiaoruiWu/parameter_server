@@ -8,6 +8,7 @@ void WorkloadPool::set(const Workload& load) {
   CHECK_GT(load.replica(), 0);
   DataConfig files = searchFiles(load.data());
   VLOG(1) << "find " << files.file_size() << " files: " << files.ShortDebugString();
+  std::cout << "find " << files.file_size() << " files: " << files.ShortDebugString() << std::endl;
 
   loads_.resize(files.file_size() * load.replica());
   int k = 0;

@@ -26,6 +26,7 @@ class AsyncSGDScheduler : public ISGDScheduler {
     Workload load;
     *load.mutable_data() = conf_.training_data();
     load.mutable_data()->set_ignore_feature_group(true);
+    std::cout << "conf_.async_sgd().num_data_pass() = " << conf_.async_sgd().num_data_pass() << std::endl;
     load.set_replica(conf_.async_sgd().num_data_pass());
     load.set_shuffle(true);
     workload_pool_ = new WorkloadPool(load);

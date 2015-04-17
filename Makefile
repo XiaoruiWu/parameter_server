@@ -22,7 +22,7 @@ CFLAGS = -std=c++0x $(WARN) $(OPT) $(INCPATH) $(EXTRA_CFLAGS)
 ifeq ($(USE_S3), 1)
 CFLAGS += -DUSE_S3=1
 endif
-LDFLAGS = $(EXTRA_LDFLAGS) $(THIRD_LIB) -lpthread # -lrt
+LDFLAGS = $(EXTRA_LDFLAGS) $(THIRD_LIB) -lpthread -Wl,-rpath,$(THIRD_PATH)/lib
 
 PS_LIB = build/libps.a
 PS_MAIN = build/libpsmain.a
