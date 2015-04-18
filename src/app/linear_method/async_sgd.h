@@ -69,6 +69,7 @@ class AsyncSGDServer : public ISGDCompNode {
     auto output = conf_.model_output();
     if (output.format() == DataConfig::TEXT) {
       CHECK(output.file_size());
+      // CUI: models at different iterations saved to different files
       std::string file = output.file(0) + "_" + std::to_string(count_) + "_" + MyNodeID();
       CHECK_NOTNULL(model_)->WriteToFile(file);
       LOG(INFO) << MyNodeID() << " written the model to " << file;
@@ -199,6 +200,8 @@ class AsyncSGDWorker : public ISGDCompNode {
   AsyncSGDWorker(const Config& conf)
       : ISGDCompNode(), conf_(conf) {
     loss_ = createLoss<V>(conf_.loss());
+
+    // CUI: loading local files
     std::string datafile_prefix = "/data/data.libsvm";
     std::string worker_datafile_prefix = datafile_prefix + "." + MyNodeID().substr(1);
     int num_files = 2;
@@ -240,10 +243,24 @@ class AsyncSGDWorker : public ISGDCompNode {
   void UpdateModel(const Workload& load) {
     LOG(INFO) << MyNodeID() << ": accept workload " << load.id();
     VLOG(1) << "workload data: " << load.data().ShortDebugString();
-    std::cout << MyNodeID() << " work on data: " << load.data().ShortDebugString() << std::endl;
+    std::cout << MyNodeID() << " scheduled to work on data: " << load.data().ShortDebugString() << std::endl;
+    std::cout << "load.data().file_size() = " << load.data().file_size() << std::endl;
+
+    // CUI: work on my own data instead of the data assigned by the scheduler
+    DataConfig myload_data = load.data();
+    myload_data.clear_file();
+    if (current_file_ < files_.size() * num_passes_) {
+      myload_data.add_file(files_[current_file_ % files_.size()]);
+      current_file_++;
+    } else {
+      std::cout << "no work to do, current_file_ = " << current_file_ << std::endl;
+      sleep(5000)
+    }
+    std::cout << MyNodeID() << " but I will work on data: " << myload_data.ShortDebugString() << std::endl;
+    std::cout << "myload.data().file_size() = " << myload_data.file_size() << std::endl;
     const auto& sgd = conf_.async_sgd();
     MinibatchReader<V> reader;
-    reader.InitReader(load.data(), sgd.minibatch(), sgd.data_buf());
+    reader.InitReader(myload_data, sgd.minibatch(), sgd.data_buf());
     reader.InitFilter(sgd.countmin_n(), sgd.countmin_k(), sgd.tail_feature_freq());
     reader.Start();
 
@@ -263,10 +280,10 @@ class AsyncSGDWorker : public ISGDCompNode {
       model_[id].key = key;
       model_.Pull(req, key, [this, id]() { ComputeGradient(id); });
     }
-
+    std::cout << "id = " << id << std::endl;
     while (processed_batch_ < id) { usleep(500); }
     LOG(INFO) << MyNodeID() << ": finished workload " << load.id();
-    std::cout << MyNodeID() << ": finished workload " << load.data().ShortDebugString() << std::endl;
+    std::cout << MyNodeID() << ": finished workload " << myload_data.ShortDebugString() << std::endl;
   }
 
   /**
@@ -318,6 +335,8 @@ private:
   std::mutex mu_;
   std::atomic_int processed_batch_;
   int workload_id_ = -1;
+  int current_file_ = 0;
+  int num_passes_ = 1;
   std::vector<std::string> files_;
 
   Config conf_;

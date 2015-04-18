@@ -85,6 +85,7 @@ void ISGDScheduler::ShowProgress(
          (double)nnz_w,
          sqrt(delta_sum) / sqrt(weight_sum));
 
+  // CUI: periodically save the current model
   if (report_count_ % 10 == 0) {
     // save model
     NOTICE("save model");
