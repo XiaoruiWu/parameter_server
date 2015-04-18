@@ -70,7 +70,12 @@ class AsyncSGDServer : public ISGDCompNode {
     if (output.format() == DataConfig::TEXT) {
       CHECK(output.file_size());
       // CUI: models at different iterations saved to different files
-      std::string file = output.file(0) + "_" + std::to_string(count_) + "_" + MyNodeID();
+      std::string walltime_filename = output.file(0) + "_" + MyNodeID() + "_walltimes";
+      std::ofstream walltime_file(walltime_filename.c_str(), std::ofstream::out | std::ofstream::app);
+      timeval walltime;
+      gettimeofday(&walltime, 0);
+      walltime_file << std::to_string(count_) << "\t" << walltime.tv_sec << std::endl;
+      std::string file = output.file(0) + "_" + MyNodeID() + "_" + std::to_string(count_);
       CHECK_NOTNULL(model_)->WriteToFile(file);
       LOG(INFO) << MyNodeID() << " written the model to " << file;
       count_++;
