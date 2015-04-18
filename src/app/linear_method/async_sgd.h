@@ -250,11 +250,17 @@ class AsyncSGDWorker : public ISGDCompNode {
     DataConfig myload_data = load.data();
     myload_data.clear_file();
     if (current_file_ < files_.size() * num_passes_) {
-      myload_data.add_file(files_[current_file_ % files_.size()]);
-      current_file_++;
+      for (int i = 0; i < num_passes_; i++) {
+        for (int j = 0; j < files_.size(); j++) {
+          myload_data.add_file(files_[j]);
+        }
+      }
+      current_file_ = files_.size() * num_passes_;
+      // myload_data.add_file(files_[current_file_ % files_.size()]);
+      // current_file_++;
     } else {
       std::cout << "no work to do, current_file_ = " << current_file_ << std::endl;
-      sleep(5000)
+      sleep(5000);
     }
     std::cout << MyNodeID() << " but I will work on data: " << myload_data.ShortDebugString() << std::endl;
     std::cout << "myload.data().file_size() = " << myload_data.file_size() << std::endl;
