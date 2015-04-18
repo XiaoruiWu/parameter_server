@@ -199,6 +199,14 @@ class AsyncSGDWorker : public ISGDCompNode {
   AsyncSGDWorker(const Config& conf)
       : ISGDCompNode(), conf_(conf) {
     loss_ = createLoss<V>(conf_.loss());
+    std::string datafile_prefix = "/data/data.libsvm";
+    std::string worker_datafile_prefix = datafile_prefix + "." + MyNodeID().substr(1);
+    int num_files = 2;
+    for (int i = 0; i < num_files; i++) {
+      std::string filename = worker_datafile_prefix + "." + std::to_string(i);
+      std::cout << "push back " << filename << std::endl;
+      files_.push_back(filename);
+    }
   }
   virtual ~AsyncSGDWorker() { }
 
@@ -258,6 +266,7 @@ class AsyncSGDWorker : public ISGDCompNode {
 
     while (processed_batch_ < id) { usleep(500); }
     LOG(INFO) << MyNodeID() << ": finished workload " << load.id();
+    std::cout << MyNodeID() << ": finished workload " << load.data().ShortDebugString() << std::endl;
   }
 
   /**
@@ -309,6 +318,7 @@ private:
   std::mutex mu_;
   std::atomic_int processed_batch_;
   int workload_id_ = -1;
+  std::vector<std::string> files_;
 
   Config conf_;
 };
