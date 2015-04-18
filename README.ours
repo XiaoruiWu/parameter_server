@@ -1,0 +1,49 @@
+Upload your SSH public key (./ssh/id_rsa.pub) to Github
+
+Get the parameter_server code
+  (on the login node)
+  git clone git@github.com:cuihenggang/parameter_server.git
+
+Get the third-party dependency packages
+  (on the login node)
+  cd ~/parameter_server
+  git clone https://github.com/mli/third_party
+
+Install the third-party dependencies
+  (you only need to do that on one of the nodes, because the packages are installed in your home directory)
+  (login to one of the experiment nodes)
+  cd ~/parameter_server/third-party
+  ./install.sh
+  (it will be silent for a while when it's unzipping the packages)
+
+Build parameter_server
+  cd ~/parameter_server
+  make -j8
+
+Prepare a hostfile
+  it might be:
+    h0
+    h1
+  for workers on 2 machines
+
+Prepare an application configuration file
+
+Launch the experiment
+  cd ~/parameter_server
+  ./script/ps.sh start -hostfile ~/machinefile -nw 4 -ns 4 build/linear -app_file conf/online_l1lr.conf
+
+Kill the PS processes
+  cd ~/parameter_server
+  python script/killall.py ~/machinefile
+
+Change the model snapshot frequency
+  modify src/learner/sgd.cc : ISGDScheduler::ShowProgress()
+
+Change the model snapshot file names
+  modify src/app/linear_method/async_sgd.h : AsyncSGDServer::SaveModel()
+
+Change data file names
+  modify src/app/linear_method/async_sgd.h : AsyncSGDWorker::AsyncSGDWorker()
+
+Change number of data passes
+  modify src/app/linear_method/async_sgd.h : AsyncSGDWorker::UpdateModel()
