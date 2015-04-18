@@ -254,13 +254,14 @@ class AsyncSGDWorker : public ISGDCompNode {
     // CUI: work on my own data instead of the data assigned by the scheduler
     DataConfig myload_data = load.data();
     myload_data.clear_file();
-    if (current_file_ < files_.size() * num_passes_) {
-      for (int i = 0; i < num_passes_; i++) {
+    int num_passes = 1;
+    if (current_file_ < files_.size() * num_passes) {
+      for (int i = 0; i < num_passes; i++) {
         for (int j = 0; j < files_.size(); j++) {
           myload_data.add_file(files_[j]);
         }
       }
-      current_file_ = files_.size() * num_passes_;
+      current_file_ = files_.size() * num_passes;
       // myload_data.add_file(files_[current_file_ % files_.size()]);
       // current_file_++;
     } else {
@@ -347,7 +348,6 @@ private:
   std::atomic_int processed_batch_;
   int workload_id_ = -1;
   int current_file_ = 0;
-  int num_passes_ = 1;
   std::vector<std::string> files_;
 
   Config conf_;
