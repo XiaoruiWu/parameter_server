@@ -207,12 +207,13 @@ class AsyncSGDWorker : public ISGDCompNode {
     loss_ = createLoss<V>(conf_.loss());
 
     // CUI: loading local files
-    std::string datafile_prefix = "/data/data.libsvm";
+    std::string datafile_prefix = "/l0/criteo.libsvm";
     std::string worker_datafile_prefix = datafile_prefix + "." + MyNodeID().substr(1);
-    int num_files = 2;
+    int worker_id = std::stoi(MyNodeID().substr(1));
+    int num_files = worker_id <= 237 ? 4 : 3;
     for (int i = 0; i < num_files; i++) {
       std::string filename = worker_datafile_prefix + "." + std::to_string(i);
-      std::cout << "push back " << filename << std::endl;
+      // std::cout << "push back " << filename << std::endl;
       files_.push_back(filename);
     }
   }
